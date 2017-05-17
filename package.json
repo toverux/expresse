@@ -1,0 +1,28 @@
+{
+  "name": "@toverux/expresse",
+  "version": "0.0.0-semantic-release",
+  "description": "ExpreSSE: A better module for working with Server-Sent Events in Express",
+  "author": "Morgan Touverey Quilling <mtouverey@methodinthemadness.eu>",
+  "license": "MIT",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "yarn lint && tsc",
+    "watch": "tsc -w",
+    "lint": "tslint src/**/*.ts"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/toverux/expresse.git"
+  },
+  "bugs": {
+    "url": "https://github.com/toverux/expresse/issues"
+  },
+  "homepage": "https://github.com/toverux/expresse#readme",
+  "devDependencies": {
+    "@types/node": "^7.0.18",
+    "semantic-release": "^6.3.6",
+    "tslint": "^5.2.0",
+    "typescript": "^2.3.2"
+  }
+}
