@@ -2,16 +2,17 @@
 
 # ExpreSSE [![npm version](https://img.shields.io/npm/v/@toverux/expresse.svg?style=flat-square)](https://www.npmjs.com/package/@toverux/expresse) ![license](https://img.shields.io/github/license/mitmadness/UnityInvoker.svg?style=flat-square) [![Travis Build](https://img.shields.io/travis/toverux/expresse.svg?style=flat-square)](https://travis-ci.org/toverux/expresse) ![typescript compatible](https://img.shields.io/badge/typescript-compatible-green.svg?style=flat-square)
 
-----------------
-
 ExpreSSE is a set of middlewares for working with [Server-Sent Events (SSE)](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) in [Express](http://expressjs.com/fr/). SSE is a simple unidirectional protocol that lets an HTTP server push messages to a client that uses `window.EventSource`. It's HTTP long-polling, without polling!
 
 From the MDN:
 
 > Traditionally, a web page has to send a request to the server to receive new data; that is, the page requests data from the server. With server-sent events, it's possible for a server to send new data to a web page at any time, by pushing messages to the web page. 
 
+----------------
+
  - [Installation & Usage](#package-installation--usage)
- - [`sse()` middleware](#sse-middleware)
+ - [`sse()` middleware](#sse-middleware) — one to one (server to client)
+ - ( more middlewares to come! )
  - Notes:
    [About browser support](#about-browser-support), [Using a serializer for messages's `data` field](#using-a-serializer-for-messages-data-fields)
 
