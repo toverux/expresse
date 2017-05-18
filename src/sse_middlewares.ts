@@ -1,18 +1,28 @@
 import { Handler } from 'express';
 
-export function sse(): Handler {
+export interface ISseMiddlewareOptions {
+    /**
+     * Determines the interval, in milliseconds, between keep-alive packets (neutral SSE comments).
+     */
+    keepAliveInterval: number;
+}
+
+export function sse(options: Partial<ISseMiddlewareOptions> = {}): Handler {
+    const { keepAliveInterval = 5000 } = options;
+
     return (req, res, next) => {
         res.set({
             'Content-Type': 'text/event-stream',
             'Cache-Control': 'no-cache'
         });
 
-        const keepAliveInterval = setInterval(() => {
-            console.log('send keepalive');
-            res.write(': keepalive ');
-        }, 3000);
+        res.write(': sse-start\n');
 
-        res.on('close', () => clearInterval(keepAliveInterval));
+        const keepAliveTimer = setInterval(() => {
+            res.write(': sse-keep-alive\n');
+        }, keepAliveInterval);
+
+        res.on('close', () => clearInterval(keepAliveTimer));
 
         next();
     };
