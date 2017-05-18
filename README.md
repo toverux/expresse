@@ -1,6 +1,6 @@
 <img src="https://raw.githubusercontent.com/toverux/expresse/master/expresse.png" alt="AssetBundleCompiler logo" align="right">
 
-# ExpreSSE [![Travis Build](https://img.shields.io/travis/toverux/expresse.svg?style=flat-square)](https://travis-ci.org/toverux/expresse) ![typescript compatible](https://img.shields.io/badge/typescript-compatible-green.svg?style=flat-square)
+# ExpreSSE [![npm version](https://img.shields.io/npm/v/@toverux/expresse.svg?style=flat-square)](https://www.npmjs.com/package/@toverux/expresse) ![license](https://img.shields.io/github/license/mitmadness/UnityInvoker.svg?style=flat-square) [![Travis Build](https://img.shields.io/travis/toverux/expresse.svg?style=flat-square)](https://travis-ci.org/toverux/expresse) ![typescript compatible](https://img.shields.io/badge/typescript-compatible-green.svg?style=flat-square)
 
 ----------------
 
@@ -9,6 +9,11 @@ ExpreSSE is a set of middlewares for working with [Server-Sent Events (SSE)](htt
 From the MDN:
 
 > Traditionally, a web page has to send a request to the server to receive new data; that is, the page requests data from the server. With server-sent events, it's possible for a server to send new data to a web page at any time, by pushing messages to the web page. 
+
+ - [Installation & Usage](#package-installation--usage)
+ - [`sse()` middleware](#sse-middleware)
+ - Notes:
+   [About browser support](#about-browser-support), [Using a serializer for messages's `data` field](#using-a-serializer-for-messages-data-fields)
 
 ----------------
 
@@ -68,6 +73,8 @@ interface ISSEMiddlewareOptions {
     keepAliveInterval?: number;
 }
 ```
+
+:arrow_right: [Read more about `serializer`](#using-a-serializer-for-messages-data-fields)
 </details>
 <br>
 
@@ -103,7 +110,7 @@ router.get('/events', sse(/* options */), (req, res: ISSECapableResponse) => {
 
 ### About browser support
 
-The W3C standard client for Server-Sent events is [EventSource](https://developer.mozilla.org/fr/docs/Web/API/EventSource). Unfortunately, it is not yep implemented in Internet Explorer or Microsoft Edge.
+The W3C standard client for Server-Sent events is [EventSource](https://developer.mozilla.org/fr/docs/Web/API/EventSource). Unfortunately, it is not yet implemented in Internet Explorer or Microsoft Edge.
 
 You may want to use a polyfill on the client side if your application targets those browsers.
 
