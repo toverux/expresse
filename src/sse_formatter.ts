@@ -60,7 +60,7 @@ export function block(instructions: ISSEBlockConfiguration, serializer?: SSESeri
 }
 
 /**
- * Create a buffer for a standard SSE block composed of an event name, data, and message id (none is mandatory).
+ * Create a buffer for a standard SSE block composed of `event`, `data`, and `id` (only `data` is mandatory).
  * To create a data-only message (without event name), pass `null` to `event`.
  * @param event The event name, null to create a data-only message
  * @param data The event data
@@ -69,7 +69,7 @@ export function block(instructions: ISSEBlockConfiguration, serializer?: SSESeri
  */
 export function message(
     event: string|null,
-    data?: SSEValue,
+    data: SSEValue,
     id?: string,
     serializer?: SSESerializer
 ): Buffer {
@@ -77,7 +77,12 @@ export function message(
 
     id != null && (frame.id = id);
     event != null && (frame.event = event);
-    data != null && (frame.data = data);
+
+    if (data === undefined) {
+        throw new Error('The `data` field in a message is mandatory');
+    }
+
+    frame.data = data;
 
     return block(frame, serializer);
 }
