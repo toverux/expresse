@@ -1,19 +1,7 @@
-import { Handler, Response } from 'express';
+import { compose } from 'compose-middleware';
+import { Handler, NextFunction, Request, Response } from 'express';
 import * as fmt from './sse_formatter';
-
-export interface ISSEMiddlewareOptions {
-    /**
-     * Serializer function applied on all messages' data field (except when you direclty pass a Buffer).
-     * SSE comments are not serialized using this function.
-     * Defaults to JSON.stringify().
-     */
-    serializer: fmt.SSESerializer;
-
-    /**
-     * Determines the interval, in milliseconds, between keep-alive packets (neutral SSE comments).
-     */
-    keepAliveInterval: number;
-}
+import { ISSEMiddlewareOptions, sseHandler } from './sse_handler_middleware';
 
 export interface ISSECapableResponse extends Response {
     /**
@@ -41,27 +29,9 @@ export interface ISSECapableResponse extends Response {
  * @param options An ISSEMiddlewareOptions to configure the middleware's behaviour.
  */
 export function sse(options: Partial<ISSEMiddlewareOptions> = {}): Handler {
-    const { serializer, keepAliveInterval = 5000 } = options;
+    const { serializer } = options;
 
-    return (req, res: ISSECapableResponse, next) => {
-        //=> Basic headers for an SSE session
-        res.set({
-            'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache'
-        });
-
-        //=> Write immediately on the socket.
-        // This has the advantage to 'test' the connection: if the client can't access this resource because of
-        // CORS restrictions, the connection will fail instantly.
-        res.write(': sse-start\n');
-
-        //=> Regularly send keep-alive SSE comments, clear interval on socket close
-        const keepAliveTimer = setInterval(() => {
-            res.write(': sse-keep-alive\n');
-        }, keepAliveInterval);
-
-        res.on('close', () => clearInterval(keepAliveTimer));
-
+    function middleware(req: Request, res: ISSECapableResponse, next: NextFunction) {
         //=> Install the sse*() functions on Express' Response
         res.sse = (event: string|null, data: fmt.SSEValue, id?: string) => {
             return res.write(fmt.message(event, data, id, serializer));
@@ -71,7 +41,9 @@ export function sse(options: Partial<ISSEMiddlewareOptions> = {}): Handler {
             return res.write(fmt.comment(comment));
         };
 
-        //=> Goto consumer's SSE middleware
+        //=> Done
         next();
-    };
+    }
+
+    return compose(sseHandler(options), middleware);
 }
