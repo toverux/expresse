@@ -14,7 +14,7 @@ From the MDN:
  - [`sse()` middleware](#sse-middleware) — one to one (server to client)
  - ( more middlewares to come! )
  - Notes:
-   [About browser support](#about-browser-support), [Using a serializer for messages's `data` field](#using-a-serializer-for-messages-data-fields)
+   [About browser support](#about-browser-support), [Using a serializer for messages' `data` field](#using-a-serializer-for-messages-data-fields)
 
 ----------------
 
