@@ -23,6 +23,7 @@ const jsonSerialize: SSESerializer = JSON.stringify;
 
 /**
  * Creates a Buffer for a SSE "instruction" -- `event: myEvent\n`
+ *
  * @param field The instruction field
  * @param value The instruction value
  * @param serializer Value serializer for `data`
@@ -35,6 +36,7 @@ export function instruction(field: SSEField, value: SSEValue, serializer?: SSESe
 
 /**
  * Creates a Buffer for a SSE comment -- `: this is a comment\n`
+ *
  * @param comment The comment message
  */
 export function comment(comment: string): Buffer {
@@ -43,6 +45,7 @@ export function comment(comment: string): Buffer {
 
 /**
  * Creates a Buffer for a SSE block of instructions -- event: myEvent\ndata: "eventData"\n\n
+ *
  * @param instructions An object map of SSEFields to SSEValues
  * @param serializer Value serializer for `data`
  */
@@ -62,6 +65,7 @@ export function block(instructions: ISSEBlockConfiguration, serializer?: SSESeri
 /**
  * Create a buffer for a standard SSE block composed of `event`, `data`, and `id` (only `data` is mandatory).
  * To create a data-only message (without event name), pass `null` to `event`.
+ *
  * @param event The event name, null to create a data-only message
  * @param data The event data
  * @param id The event ID
@@ -89,10 +93,11 @@ export function message(
 
 /**
  * Applies the serializer on a value then converts the resulting string in an UTF-8 Buffer of characters.
+ *
  * @param value The value to serialize
  * @param serializer Value serializer
  */
-export function toBuffer(value: SSEValue, serializer: SSESerializer = jsonSerialize) {
+function toBuffer(value: SSEValue, serializer: SSESerializer = jsonSerialize) {
     if (Buffer.isBuffer(value)) {
         return value;
     }

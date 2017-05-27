@@ -18,6 +18,7 @@ export interface ISSEMiddlewareOptions {
 export interface ISSECapableResponse extends Response {
     /**
      * Writes a standard SSE message on the socket.
+     *
      * @param event The event name, null to create a data-only message
      * @param data The event data, mandatory
      * @param id The event ID, useful for replay thanks to the Last-Event-ID header
@@ -27,6 +28,7 @@ export interface ISSECapableResponse extends Response {
     /**
      * Writes a standard SSE comment on the socket.
      * Comments are informative and useful for debugging. There are discarded by EventSource on the browser.
+     *
      * @param comment The comment message (not serialized)
      */
     sseComment(comment: string): boolean;
@@ -35,6 +37,7 @@ export interface ISSECapableResponse extends Response {
 /**
  * SSE middleware that configures an Express response for an SSE session,
  * and installs sse() and sseComment() functions on the Response object
+ *
  * @param options An ISSEMiddlewareOptions to configure the middleware's behaviour.
  */
 export function sse(options: Partial<ISSEMiddlewareOptions> = {}): Handler {
