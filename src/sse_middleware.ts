@@ -1,17 +1,34 @@
 import { compose } from 'compose-middleware';
 import { Handler, NextFunction, Request, Response } from 'express';
 import * as fmt from './sse_formatter';
-import { ISSEMiddlewareOptions, sseHandler } from './sse_handler_middleware';
+import { ISseMiddlewareOptions, sseHandler } from './sse_handler_middleware';
 
-export interface ISSECapableResponse extends Response {
+export interface ISseFunctions {
     /**
-     * Writes a standard SSE message on the socket.
+     * Writes a standard SSE data message on the socket.
      *
-     * @param event The event name, null to create a data-only message
-     * @param data The event data, mandatory
+     * Client example:
+     *     const ev = new EventSource('/sse');
+     *     ev.addEventListener('message', event => console.log(event.data)); // recommended
+     *     ev.onmessage = event => console.log(event.data); // legacy way
+     *
+     * @param data The event data1
      * @param id The event ID, useful for replay thanks to the Last-Event-ID header
      */
-    sse(event: string|null, data: fmt.SSEValue, id?: string): boolean;
+    data(data: fmt.SSEValue, id?: string): boolean;
+
+    /**
+     * Writes a standard SSE message (with named event) on the socket.
+     *
+     * Client example:
+     *     const ev = new EventSource('/sse');
+     *     ev.addEventListener('evname', event => console.log(event.data));
+     *
+     * @param event The event name
+     * @param data The event data (mandatory!)
+     * @param id The event ID, useful for replay thanks to the Last-Event-ID header
+     */
+    event(event: string, data: fmt.SSEValue, id?: string): boolean;
 
     /**
      * Writes a standard SSE comment on the socket.
@@ -19,26 +36,38 @@ export interface ISSECapableResponse extends Response {
      *
      * @param comment The comment message (not serialized)
      */
-    sseComment(comment: string): boolean;
+    comment(comment: string): boolean;
+}
+
+/**
+ * An ISseResponse is an augmented Express response that contains an `sse` property that contains various
+ * functions (data, event and comment) to send SSE messages.
+ */
+export interface ISseResponse extends Response {
+    sse: ISseFunctions;
 }
 
 /**
  * SSE middleware that configures an Express response for an SSE session,
  * and installs sse() and sseComment() functions on the Response object
  *
- * @param options An ISSEMiddlewareOptions to configure the middleware's behaviour.
+ * @param options An ISseMiddlewareOptions to configure the middleware's behaviour.
  */
-export function sse(options: Partial<ISSEMiddlewareOptions> = {}): Handler {
+export function sse(options: Partial<ISseMiddlewareOptions> = {}): Handler {
     const { serializer } = options;
 
-    function middleware(req: Request, res: ISSECapableResponse, next: NextFunction) {
+    function middleware(req: Request, res: Response, next: NextFunction): void {
         //=> Install the sse*() functions on Express' Response
-        res.sse = (event: string|null, data: fmt.SSEValue, id?: string) => {
-            return res.write(fmt.message(event, data, id, serializer));
-        };
-
-        res.sseComment = (comment: string) => {
-            return res.write(fmt.comment(comment));
+        (res as ISseResponse).sse = {
+            data(data: fmt.SSEValue, id?: string) {
+                return res.write(fmt.message(null, data, id, serializer));
+            },
+            event(event: string, data: fmt.SSEValue, id?: string) {
+                return res.write(fmt.message(event, data, id, serializer));
+            },
+            comment(comment: string) {
+                return res.write(fmt.comment(comment));
+            }
         };
 
         //=> Done

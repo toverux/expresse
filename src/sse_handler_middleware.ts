@@ -1,7 +1,7 @@
 import { Handler } from 'express';
 import * as fmt from './sse_formatter';
 
-export interface ISSEMiddlewareOptions {
+export interface ISseMiddlewareOptions {
     /**
      * Serializer function applied on all messages' data field (except when you direclty pass a Buffer).
      * SSE comments are not serialized using this function.
@@ -15,7 +15,7 @@ export interface ISSEMiddlewareOptions {
     keepAliveInterval: number;
 }
 
-export function sseHandler(options: Partial<ISSEMiddlewareOptions> = {}): Handler {
+export function sseHandler(options: Partial<ISseMiddlewareOptions> = {}): Handler {
     const { keepAliveInterval = 5000 } = options;
 
     return (req, res, next) => {
