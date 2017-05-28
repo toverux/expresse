@@ -15,7 +15,7 @@ export interface ISseFunctions {
      * @param data The event data1
      * @param id The event ID, useful for replay thanks to the Last-Event-ID header
      */
-    data(data: fmt.SSEValue, id?: string): boolean;
+    data(data: fmt.SSEValue, id?: string): void;
 
     /**
      * Writes a standard SSE message (with named event) on the socket.
@@ -28,7 +28,7 @@ export interface ISseFunctions {
      * @param data The event data (mandatory!)
      * @param id The event ID, useful for replay thanks to the Last-Event-ID header
      */
-    event(event: string, data: fmt.SSEValue, id?: string): boolean;
+    event(event: string, data: fmt.SSEValue, id?: string): void;
 
     /**
      * Writes a standard SSE comment on the socket.
@@ -36,7 +36,7 @@ export interface ISseFunctions {
      *
      * @param comment The comment message (not serialized)
      */
-    comment(comment: string): boolean;
+    comment(comment: string): void;
 }
 
 /**
@@ -48,8 +48,8 @@ export interface ISseResponse extends Response {
 }
 
 /**
- * SSE middleware that configures an Express response for an SSE session,
- * and installs sse() and sseComment() functions on the Response object
+ * SSE middleware that configures an Express response for an SSE session, and installs the `sse.*` functions
+ * on the Response object.
  *
  * @param options An ISseMiddlewareOptions to configure the middleware's behaviour.
  */
@@ -60,13 +60,13 @@ export function sse(options: Partial<ISseMiddlewareOptions> = {}): Handler {
         //=> Install the sse*() functions on Express' Response
         (res as ISseResponse).sse = {
             data(data: fmt.SSEValue, id?: string) {
-                return res.write(fmt.message(null, data, id, serializer));
+                res.write(fmt.message(null, data, id, serializer));
             },
             event(event: string, data: fmt.SSEValue, id?: string) {
-                return res.write(fmt.message(event, data, id, serializer));
+                res.write(fmt.message(event, data, id, serializer));
             },
             comment(comment: string) {
-                return res.write(fmt.comment(comment));
+                res.write(fmt.comment(comment));
             }
         };
 
