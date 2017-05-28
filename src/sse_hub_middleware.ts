@@ -24,6 +24,10 @@ export interface ISseHubResponse extends Response {
 }
 
 export interface ISseHubMiddlewareOptions extends ISseMiddlewareOptions {
+    /**
+     * You can pass a Hub instance for controlling the stream outside of the middleware.
+     * Otherwise, a Hub is automatically created.
+     */
     hub: Hub;
 }
 

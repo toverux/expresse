@@ -12,11 +12,11 @@ export class Hub {
         this.clients.delete(funcs);
     }
 
-    public data(data: fmt.SSEValue, id?: string): void {
+    public data(data: fmt.SseValue, id?: string): void {
         this.clients.forEach(client => client.data(data, id));
     }
 
-    public event(event: string, data: fmt.SSEValue, id?: string): void {
+    public event(event: string, data: fmt.SseValue, id?: string): void {
         this.clients.forEach(client => client.event(event, data, id));
     }
 

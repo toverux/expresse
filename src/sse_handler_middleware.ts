@@ -5,12 +5,15 @@ export interface ISseMiddlewareOptions {
     /**
      * Serializer function applied on all messages' data field (except when you direclty pass a Buffer).
      * SSE comments are not serialized using this function.
-     * Defaults to JSON.stringify().
+     *
+     * @default JSON.stringify
      */
-    serializer: fmt.SSESerializer;
+    serializer: fmt.SseSerializer;
 
     /**
      * Determines the interval, in milliseconds, between keep-alive packets (neutral SSE comments).
+     *
+     * @default 5000
      */
     keepAliveInterval: number;
 }

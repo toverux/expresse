@@ -7,7 +7,7 @@ describe('sse_formatter', () => {
 
     describe('instruction()', () => {
         it('formats a SSE instruction', () => {
-            availSseFields.forEach((field: sseFormatter.SSEField) => {
+            availSseFields.forEach((field: sseFormatter.SseField) => {
                 const line = sseFormatter.instruction(field, 'message', testSerializer).toString();
 
                 expect(line).to.equal(`${field}: ((message))\n`);

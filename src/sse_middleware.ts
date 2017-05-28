@@ -15,7 +15,7 @@ export interface ISseFunctions {
      * @param data The event data1
      * @param id The event ID, useful for replay thanks to the Last-Event-ID header
      */
-    data(data: fmt.SSEValue, id?: string): void;
+    data(data: fmt.SseValue, id?: string): void;
 
     /**
      * Writes a standard SSE message (with named event) on the socket.
@@ -28,7 +28,7 @@ export interface ISseFunctions {
      * @param data The event data (mandatory!)
      * @param id The event ID, useful for replay thanks to the Last-Event-ID header
      */
-    event(event: string, data: fmt.SSEValue, id?: string): void;
+    event(event: string, data: fmt.SseValue, id?: string): void;
 
     /**
      * Writes a standard SSE comment on the socket.
@@ -59,10 +59,10 @@ export function sse(options: Partial<ISseMiddlewareOptions> = {}): Handler {
     function middleware(req: Request, res: Response, next: NextFunction): void {
         //=> Install the sse*() functions on Express' Response
         (res as ISseResponse).sse = {
-            data(data: fmt.SSEValue, id?: string) {
+            data(data: fmt.SseValue, id?: string) {
                 res.write(fmt.message(null, data, id, serializer));
             },
-            event(event: string, data: fmt.SSEValue, id?: string) {
+            event(event: string, data: fmt.SseValue, id?: string) {
                 res.write(fmt.message(event, data, id, serializer));
             },
             comment(comment: string) {

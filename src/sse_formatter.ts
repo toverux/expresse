@@ -1,11 +1,11 @@
-export type SSEField = 'event'|'data'|'id'|'retry'; // keyof fieldBufs
+export type SseField = 'event'|'data'|'id'|'retry'; // keyof fieldBufs
 
-export type SSEValue = Buffer|any;
+export type SseValue = Buffer|any;
 
-export type SSESerializer = (value: any) => string|Buffer;
+export type SseSerializer = (value: any) => string|Buffer;
 
-export interface ISSEBlockConfiguration {
-    [field: string /* in fact SSEField */]: SSEValue;
+export interface ISseBlockConfiguration {
+    [field: string /* in fact SseField */]: SseValue;
 }
 
 const fieldBuffers = {
@@ -18,8 +18,8 @@ const fieldBuffers = {
 
 const eolBuf = Buffer.from('\n');
 
-const stringSerialize: SSESerializer = String;
-const jsonSerialize: SSESerializer = JSON.stringify;
+const stringSerialize: SseSerializer = String;
+const jsonSerialize: SseSerializer = JSON.stringify;
 
 /**
  * Creates a Buffer for a SSE "instruction" -- `event: myEvent\n`
@@ -28,7 +28,7 @@ const jsonSerialize: SSESerializer = JSON.stringify;
  * @param value The instruction value
  * @param serializer Value serializer for `data`
  */
-export function instruction(field: SSEField, value: SSEValue, serializer?: SSESerializer): Buffer {
+export function instruction(field: SseField, value: SseValue, serializer?: SseSerializer): Buffer {
     return Buffer.concat([
         fieldBuffers[field], toBuffer(value, serializer), eolBuf
     ]);
@@ -40,7 +40,7 @@ export function instruction(field: SSEField, value: SSEValue, serializer?: SSESe
  * @param comment The comment message
  */
 export function comment(comment: string): Buffer {
-    return instruction('__comment__' as SSEField, comment, stringSerialize);
+    return instruction('__comment__' as SseField, comment, stringSerialize);
 }
 
 /**
@@ -49,12 +49,12 @@ export function comment(comment: string): Buffer {
  * @param instructions An object map of SSEFields to SSEValues
  * @param serializer Value serializer for `data`
  */
-export function block(instructions: ISSEBlockConfiguration, serializer?: SSESerializer): Buffer {
+export function block(instructions: ISseBlockConfiguration, serializer?: SseSerializer): Buffer {
     const lines = Object.keys(instructions).map((field) => {
         const fieldSerializer = field === 'data' ? serializer : stringSerialize;
 
         return instruction(
-            field as SSEField,
+            field as SseField,
             toBuffer(instructions[field], fieldSerializer)
         );
     });
@@ -73,11 +73,11 @@ export function block(instructions: ISSEBlockConfiguration, serializer?: SSESeri
  */
 export function message(
     event: string|null,
-    data: SSEValue,
+    data: SseValue,
     id?: string,
-    serializer?: SSESerializer
+    serializer?: SseSerializer
 ): Buffer {
-    const frame: ISSEBlockConfiguration = {};
+    const frame: ISseBlockConfiguration = {};
 
     id != null && (frame.id = id);
     event != null && (frame.event = event);
@@ -97,7 +97,7 @@ export function message(
  * @param value The value to serialize
  * @param serializer Value serializer
  */
-function toBuffer(value: SSEValue, serializer: SSESerializer = jsonSerialize) {
+function toBuffer(value: SseValue, serializer: SseSerializer = jsonSerialize) {
     if (Buffer.isBuffer(value)) {
         return value;
     }
