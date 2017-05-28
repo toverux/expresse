@@ -2,7 +2,7 @@
 
 # ExpreSSE [![npm version](https://img.shields.io/npm/v/@toverux/expresse.svg?style=flat-square)](https://www.npmjs.com/package/@toverux/expresse) ![license](https://img.shields.io/github/license/mitmadness/UnityInvoker.svg?style=flat-square) [![Travis Build](https://img.shields.io/travis/toverux/expresse.svg?style=flat-square)](https://travis-ci.org/toverux/expresse) ![npm total downloads](https://img.shields.io/npm/dt/@toverux/expresse.svg?style=flat-square)
 
-ExpreSSE is a set of middlewares for working with [Server-Sent Events (SSE)](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) in [Express](http://expressjs.com/fr/). SSE is a simple unidirectional protocol that lets an HTTP server push messages to a client that uses `window.EventSource`. It's HTTP long-polling, without polling!
+ExpreSSE is a set of middlewares - with a simple and elegant API - for working with [Server-Sent Events (SSE)](https://developer.mozilla.org/en-US/docs/Web/API/Server-sent_events) in [Express](http://expressjs.com/fr/). SSE is a simple unidirectional protocol that lets an HTTP server push messages to a client that uses `window.EventSource`. It's HTTP long-polling, without polling!
 
 From the MDN:
 
@@ -11,8 +11,8 @@ From the MDN:
 ----------------
 
  - [Installation & Usage](#package-installation--usage)
- - [`sse()` middleware](#sse-middleware) — one to one (server to client)
- - ( more middlewares to come! )
+ - [`sse()` middleware](#sse-middleware) — one to one (server to 1 client)
+ - [`sseHub()` middleware](#ssehub-middleware) — one to many (server to n clients)
  - Notes:
    [About browser support](#about-browser-support), [Using a serializer for messages' `data` field](#using-a-serializer-for-messages-data-fields)
 
@@ -22,7 +22,7 @@ From the MDN:
 
 **Requirements:**
 
- - Node.js 5+ because ExpreSSE is transpiled down to ES6 ;
+ - Node.js 5+ because ExpreSSE is transpiled down to ES 6 ;
  - Express 4
 
 Install it via the npm registry:
@@ -38,12 +38,12 @@ yarn add @toverux/expresse
 <details>
 <summary>Import the middleware</summary>
 
- - Using ES2015 imports:
+ - Using ES 2015 imports:
  
-   `ISSECapableResponse` is a TypeScript interface. Don't try to import it when using JavaScript.
+   `ISseResponse` is a TypeScript interface. Don't try to import it when using JavaScript.
 
    ```typescript
-   import { sse, ISSECapableResponse } from '@toverux/expresse';
+   import { ISseResponse, sse } from '@toverux/expresse';
    
    // named export { sse } is also exported as { default }:
    import sse from '@toverux/expresse';
@@ -60,16 +60,19 @@ yarn add @toverux/expresse
 <summary>Available configuration options</summary>
 
 ```typescript
-interface ISSEMiddlewareOptions {
+interface ISseMiddlewareOptions {
     /**
      * Serializer function applied on all messages' data field (except when you direclty pass a Buffer).
      * SSE comments are not serialized using this function.
-     * Defaults to JSON.stringify().
+     *
+     * @default JSON.stringify
      */
     serializer?: (value: any) => string|Buffer;
 
     /**
      * Determines the interval, in milliseconds, between keep-alive packets (neutral SSE comments).
+     *
+     * @default 5000
      */
     keepAliveInterval?: number;
 }
@@ -79,31 +82,102 @@ interface ISSEMiddlewareOptions {
 </details>
 <br>
 
-Usage *(remove `ISSECapableResponse` when not using TypeScript)*:
+Usage example *(remove `ISseResponse` when not using TypeScript)*:
 
 ```typescript
 // somewhere in your module
-router.get('/events', sse(/* options */), (req, res: ISSECapableResponse) => {
-    // res.sse() and res.sseComment() are now available on Response
+router.get('/events', sse(/* options */), (req, res: ISseResponse) => {
+    let messageId = parseInt(req.header('Last-Event-ID'), 10) || 0;
     
-    let messageId = 0;
-    
-    someModule.on('event', (event) => {
-        // you can pass an event name, a payload, and an ID.
-        res.sse('myCustomEvent', event, ++messageId);
-        
-        // you can send a data-only message by passing null in the first argument.
-        // in the browser, EventSource maps this under the 'message' event (or use with onmessage).
-        res.sse(null, event);
+    someModule.on('someEvent', (event) => {
+        //=> Data messages (no event name, but defaults to 'message' in the browser).
+        res.sse.data(event);
+        //=> Named event + data (data is mandatory)
+        res.sse.event('someEvent', event);
+        //=> Comment, not interpreted by EventSource on the browser - useful for debugging/self-documenting purposes.
+        res.sse.comment('debug: someModule emitted someEvent!');
+        //=> In data() and event() you can also pass an ID - useful for replay with Last-Event-ID header.
+        res.sse.data(event, (messageId++).toString());
     });
     
-    // you can also send SSE comments, that are useful for debug
-    someModule.on('trace', () => res.sseComment(`debug: ${trace}`));
-
     // (not recommended) to force the end of the connection, you can still use res.end()
     // beware that the specification does not support server-side close, so this will result in an error in EventSource.
     // prefer sending a normal event that asks the client to call EventSource#close() itself to gracefully terminate.
-    someModule.on('finish', () => res.end());
+    someModule.on('someFinishEvent', () => res.end());
+});
+```
+
+## `sseHub()` middleware
+
+This one is very useful for pushing the same messages to multiples users at a time, so they share the same "stream".
+
+It is based on the `sse()` middleware, meaning that you can still use `res.sse.*` functions, their behavior don't change.
+For broadcasting to the users that have subscribed to the stream (meaning that they've made the request to the endpoint), use the `req.sse.broadcast.*` functions, that are exactly the same as their 1-to-1 variant.
+
+<details>
+<summary>Import the middleware</summary>
+
+ - Using ES 2015 imports:
+ 
+   `ISseHubResponse` is a TypeScript interface. Don't try to import it when using JavaScript.
+
+   ```typescript
+   import { Hub, ISseHubResponse, sseHub } from '@toverux/expresse';
+   ```
+
+ - Using CommonJS:
+
+   ```javascript
+   const { Hub, sseHub } = require('@toverux/expresse');
+   ```
+</details>
+
+<details>
+<summary>Available configuration options</summary>
+
+The options are the same from the `sse()` middleware ([see above](#sse-middleware)), plus another, `hub`:
+
+```typescript
+interface ISseHubMiddlewareOptions extends ISseMiddlewareOptions {
+    /**
+     * You can pass a Hub instance for controlling the stream outside of the middleware.
+     * Otherwise, a Hub is automatically created.
+     * 
+     * @default Hub
+     */
+    hub: Hub;
+}
+```
+</details>
+<br>
+
+First usage example - where the client has control on the hub *(remove `ISseHubResponse` when not using TypeScript)*:
+
+```typescript
+// somewhere in your module
+router.get('/events', sseHub(/* options */), (req, res: ISseHubResponse) => {
+    //=> The 1-to-1 functions are still there
+    res.sse.event('welcome', 'Welcome to you!');
+    
+    //=> But we also get a `broadcast` property with the same functions inside.
+    //   Everyone that have hit /events will get this message - including the sender!
+    res.sse.broadcast.event('newcomer', 'someone just hit the /events endpoint');
+});
+```
+
+More common usage example - where the Hub is deported outside of the middleware:
+
+```typescript
+const hub = new Hub();
+
+someModule.on('someEvent', (event) => {
+    //=> All the functions you're now used to are still there, data(), event() and comment().
+    hub.event('someEvent', event);
+});
+
+router.get('/events', sseHub({ hub }), (req, res: ISseHubResponse) => {
+    //=> The 1-to-1 functions are still there
+    res.sse.event('welcome', 'Welcome! You\'ll now receive realtime events like everyone else');
 });
 ```
 
