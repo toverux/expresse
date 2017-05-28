@@ -35,7 +35,7 @@ export function sseHandler(options: Partial<ISseMiddlewareOptions> = {}): Handle
             res.write(': sse-keep-alive\n');
         }, keepAliveInterval);
 
-        res.on('close', () => clearInterval(keepAliveTimer));
+        res.once('close', () => clearInterval(keepAliveTimer));
 
         //=> Done
         next();
