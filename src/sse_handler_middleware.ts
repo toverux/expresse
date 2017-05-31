@@ -34,11 +34,11 @@ export function sseHandler(options: Partial<ISseMiddlewareOptions> = {}): Handle
         res.write(': sse-start\n');
 
         //=> Regularly send keep-alive SSE comments, clear interval on socket close
-        const keepAliveTimer = setInterval(() => {
-            res.write(': sse-keep-alive\n');
-        }, keepAliveInterval);
+        const keepAliveTimer = setInterval(() => res.write(': sse-keep-alive\n'), keepAliveInterval);
 
+        //=> When the connection gets closed (close=client, finish=server), stop the handshake timer
         res.once('close', () => clearInterval(keepAliveTimer));
+        res.once('finish', () => clearInterval(keepAliveTimer));
 
         //=> Done
         next();
