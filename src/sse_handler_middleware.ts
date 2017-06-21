@@ -25,7 +25,8 @@ export function sseHandler(options: Partial<ISseMiddlewareOptions> = {}): Handle
         //=> Basic headers for an SSE session
         res.set({
             'Content-Type': 'text/event-stream',
-            'Cache-Control': 'no-cache'
+            'Cache-Control': 'no-cache',
+            'X-Accel-Buffering': 'no'
         });
 
         //=> Write immediately on the socket.
