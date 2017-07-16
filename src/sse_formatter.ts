@@ -39,7 +39,7 @@ export function instruction(field: SseField, value: SseValue, serializer?: SseSe
  *
  * @param comment The comment message
  */
-export function comment(comment: string): Buffer {
+export function comment(comment: string): Buffer { // tslint:disable-line:no-shadowed-variable
     return instruction('__comment__' as SseField, comment, stringSerialize);
 }
 
