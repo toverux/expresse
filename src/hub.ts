@@ -2,7 +2,7 @@ import * as fmt from './sse_formatter';
 import { ISseFunctions } from './sse_middleware';
 
 export class Hub {
-    private clients = new Set<ISseFunctions>();
+    protected readonly clients = new Set<ISseFunctions>();
 
     public register(funcs: ISseFunctions): void {
         this.clients.add(funcs);
