@@ -1,6 +1,6 @@
 import { compose } from 'compose-middleware';
 import { Handler, NextFunction, Request, Response } from 'express';
-import { Hub } from './hub';
+import { Hub, IHub } from './hub';
 import { ISseMiddlewareOptions } from './sse_handler_middleware';
 import { ISseFunctions, ISseResponse, sse } from './sse_middleware';
 
@@ -25,10 +25,10 @@ export interface ISseHubResponse extends Response {
 
 export interface ISseHubMiddlewareOptions extends ISseMiddlewareOptions {
     /**
-     * You can pass a Hub instance for controlling the stream outside of the middleware.
-     * Otherwise, a Hub is automatically created.
+     * You can pass a IHub-compatible instance for controlling the stream outside of the middleware.
+     * Otherwise, a Hub instance is automatically created.
      */
-    hub: Hub;
+    hub: IHub;
 }
 
 /**

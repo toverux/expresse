@@ -1,7 +1,23 @@
 import * as fmt from './sse_formatter';
 import { ISseFunctions } from './sse_middleware';
 
-export class Hub {
+export interface IHub extends ISseFunctions {
+    /**
+     * Remember a new client.
+     *
+     * @param funcs SSE functions bound to the client.
+     */
+    register(funcs: ISseFunctions): void;
+
+    /**
+     * Unregister a known client.
+     *
+     * @param funcs SSE function to unregister.
+     */
+    unregister(funcs: ISseFunctions): void;
+}
+
+export class Hub implements IHub {
     protected readonly clients = new Set<ISseFunctions>();
 
     public register(funcs: ISseFunctions): void {
