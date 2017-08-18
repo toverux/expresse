@@ -44,8 +44,9 @@ export function sseHub(options: Partial<ISseHubMiddlewareOptions> = {}): Handler
         //=> Register the SSE functions of that client on the hub
         hub.register(res.sse);
 
-        //=> Unregister the user from the hub when its connection gets closed
+        //=> Unregister the user from the hub when its connection gets closed (close=client, finish=server)
         res.once('close', () => hub.unregister(res.sse));
+        res.once('finish', () => hub.unregister(res.sse));
 
         //=> Make hub's functions available on the response
         (res as ISseHubResponse).sse.broadcast = {
