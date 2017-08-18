@@ -184,7 +184,7 @@ router.get('/events', sseHub({ hub }), (req, res: ISseHubResponse) => {
 
 ### `RedisHub` – Redis support for `sseHub()`
 
-In the previous example you can notice that we create the Hub object ourselves. This also mean that you can replace that class with another that has a compatible interface (implement `IHub` in [src/redis_hub.ts](src/redis_hub.ts) to make your own :coffee:).
+In the previous example you can notice that we've created the Hub object ourselves. This also means that you can replace that object with another that has a compatible interface (implement `IHub` in [src/hub.ts](src/hub.ts) to make your own :coffee:).
 
 _expresse_ provides an alternative subclass of `Hub`, `RedisHub` that uses Redis' pub/sub capabilities, which is very practical if you have multiple servers, and you want `res.sse.broadcast.*` to actually broadcast SSE messages between all the nodes.
 
