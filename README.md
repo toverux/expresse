@@ -12,9 +12,10 @@ From the MDN:
 
  - [Installation & Usage](#package-installation--usage)
  - [`sse()` middleware](#sse-middleware) — one to one (server to 1 client)
- - [`sseHub()` middleware](#ssehub-middleware) — one to many (server to n clients)
+ - [`sseHub()` middleware](#ssehub-middleware) — one to many (server to _n_ clients)
+ - [`RedisHub`](#redishub--redis-support-for-ssehub) — Redis support for `sseHub()` — (_n_ servers to _n_ clients)
  - Notes:
-   [About browser support](#about-browser-support), [Using a serializer for messages' `data` field](#using-a-serializer-for-messages-data-fields)
+   [About browser support](#about-browser-support) / [Using a serializer for messages' `data` field](#using-a-serializer-for-messages-data-fields)
 
 ----------------
 
@@ -157,11 +158,11 @@ First usage example - where the client has control on the hub *(remove `ISseHubR
 // somewhere in your module
 router.get('/events', sseHub(/* options */), (req, res: ISseHubResponse) => {
     //=> The 1-to-1 functions are still there
-    res.sse.event('welcome', 'Welcome to you!');
+    res.sse.event('welcome', 'Welcome!');
     
     //=> But we also get a `broadcast` property with the same functions inside.
     //   Everyone that have hit /events will get this message - including the sender!
-    res.sse.broadcast.event('newcomer', 'someone just hit the /events endpoint');
+    res.sse.broadcast.event('new-user', `User ${req.query.name} just hit the /channel endpoint`);
 });
 ```
 
@@ -177,7 +178,25 @@ someModule.on('someEvent', (event) => {
 
 router.get('/events', sseHub({ hub }), (req, res: ISseHubResponse) => {
     //=> The 1-to-1 functions are still there
-    res.sse.event('welcome', 'Welcome! You\'ll now receive realtime events like everyone else');
+    res.sse.event('welcome', 'Welcome! You\'ll now receive realtime events from someModule like everyone else');
+});
+```
+
+### `RedisHub` – Redis support for `sseHub()`
+
+In the previous example you can notice that we create the Hub object ourselves. This also mean that you can replace that class with another that has a compatible interface (implement `IHub` in [src/redis_hub.ts](src/redis_hub.ts) to make your own :coffee:).
+
+_expresse_ provides an alternative subclass of `Hub`, `RedisHub` that uses Redis' pub/sub capabilities, which is very practical if you have multiple servers, and you want `res.sse.broadcast.*` to actually broadcast SSE messages between all the nodes.
+
+```typescript
+// connects to localhost:6379 (default Redis port)
+const hub = new RedisHub('channel-name');
+// ...or you can pass you own two ioredis clients to bind on a custom network address
+const hub = new RedisHub('channel-name', new Redis(myRedisNodeUrl), new Redis(myRedisNodeUrl));
+
+router.get('/channel', sseHub({ hub }), (req, res: ISseHubResponse) => {
+    res.sse.event('welcome', 'Welcome!'); // 1-to-1
+    res.sse.broadcast.event('new-user', `User ${req.query.name} just hit the /channel endpoint`);
 });
 ```
 
