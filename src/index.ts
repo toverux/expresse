@@ -1,4 +1,5 @@
 export * from './hub';
+export * from './redis_hub';
 export { ISseMiddlewareOptions } from './sse_handler_middleware';
 export * from './sse_middleware';
 export * from './sse_hub_middleware';
