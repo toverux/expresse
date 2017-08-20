@@ -206,7 +206,7 @@ router.get('/channel', sseHub({ hub }), (req, res: ISseHubResponse) => {
 
 The W3C standard client for Server-Sent events is [EventSource](https://developer.mozilla.org/fr/docs/Web/API/EventSource). Unfortunately, it is not yet implemented in Internet Explorer or Microsoft Edge.
 
-You may want to use a polyfill on the client side if your application targets those browsers.
+You may want to use a polyfill on the client side if your application targets those browsers (see [eventsource](https://www.npmjs.com/package/eventsource) package on npm for Node and older browsers support).
 
 [See complete support report on _Can I use_](http://caniuse.com/#feat=eventsource)
 
