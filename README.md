@@ -208,9 +208,11 @@ The W3C standard client for Server-Sent events is [EventSource](https://develope
 
 You may want to use a polyfill on the client side if your application targets those browsers.
 
-|                     | Chrome | Edge | Firefox | Opera | Safari |
-|---------------------|--------|------|---------|-------|--------|
-| EventSource Support | 6      | No   | 6       | Yes   | 5      |
+[See complete support report on _Can I use_](http://caniuse.com/#feat=eventsource)
+
+|                     | Chrome | IE / Edge | Firefox | Opera | Safari |
+|---------------------|--------|-----------|---------|-------|--------|
+| EventSource Support | 6      | No        | 6       | 11    | 5      |
 
 ### Using a serializer for messages' `data` fields
 
