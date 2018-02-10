@@ -31,10 +31,11 @@
     "cors": "^2.8.4",
     "express": "^4.15.4",
     "mocha": "^5.0.0",
+    "nodemon": "^1.14.12",
     "semantic-release": "^12.4.1",
+    "travis-deploy-once": "^4.3.4",
     "tslint": "^5.2.0",
-    "typescript": "^2.3.2",
-    "travis-deploy-once": "^4.3.4"
+    "typescript": "^2.3.2"
   },
   "peerDependencies": {
     "express": ">=4.0.0"
