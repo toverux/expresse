@@ -1,6 +1,6 @@
 {
   "name": "@toverux/expresse",
-  "version": "0.0.0-semantic-release",
+  "version": "0.0.0-semantic-released",
   "description": "ExpreSSE: A better module for working with Server-Sent Events in Express",
   "author": "Morgan Touverey Quilling <mtouverey@methodinthemadness.eu>",
   "license": "MIT",
@@ -11,7 +11,8 @@
     "watch": "tsc -w",
     "test": "mocha dist/test/**/*.js",
     "lint": "tslint -t verbose \"src/**/*.ts\" \"test/**/*.ts\"",
-    "semantic-release": "semantic-release pre && npm publish --access public && semantic-release post"
+    "semantic-release": "semantic-release",
+    "travis-deploy-once": "travis-deploy-once"
   },
   "repository": {
     "type": "git",
@@ -30,9 +31,10 @@
     "cors": "^2.8.4",
     "express": "^4.15.4",
     "mocha": "^5.0.0",
-    "semantic-release": "^6.3.6",
+    "semantic-release": "^12.4.1",
     "tslint": "^5.2.0",
-    "typescript": "^2.3.2"
+    "typescript": "^2.3.2",
+    "travis-deploy-once": "^4.3.4"
   },
   "peerDependencies": {
     "express": ">=4.0.0"
