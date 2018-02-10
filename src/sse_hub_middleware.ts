@@ -1,4 +1,4 @@
-import { compose, Handler as ComposeHandler } from 'compose-middleware';
+import { compose } from 'compose-middleware';
 import { Handler, NextFunction, Request, Response } from 'express';
 import { Hub, IHub } from './hub';
 import { ISseMiddlewareOptions } from './sse_handler_middleware';
@@ -59,5 +59,5 @@ export function sseHub(options: Partial<ISseHubMiddlewareOptions> = {}): Handler
         next();
     }
 
-    return compose(sse(options) as ComposeHandler, middleware as ComposeHandler);
+    return compose(sse(options), middleware);
 }

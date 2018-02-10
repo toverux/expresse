@@ -1,4 +1,4 @@
-import { compose, Handler as ComposeHandler } from 'compose-middleware';
+import { compose } from 'compose-middleware';
 import { Handler, NextFunction, Request, Response } from 'express';
 import * as fmt from './sse_formatter';
 import { ISseMiddlewareOptions, sseHandler } from './sse_handler_middleware';
@@ -74,5 +74,5 @@ export function sse(options: Partial<ISseMiddlewareOptions> = {}): Handler {
         next();
     }
 
-    return compose(sseHandler(options) as ComposeHandler, middleware as ComposeHandler);
+    return compose(sseHandler(options), middleware);
 }
