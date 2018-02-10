@@ -1,5 +1,5 @@
 import { expect } from 'chai';
-import * as sseFormatter from '../src/sse_formatter';
+import * as sseFmt from '../src/sse_formatter';
 
 describe('sse_formatter', () => {
     const availSseFields = ['event', 'data', 'id', 'retry'];
@@ -7,16 +7,16 @@ describe('sse_formatter', () => {
 
     describe('instruction()', () => {
         it('formats a SSE instruction', () => {
-            availSseFields.forEach((field: sseFormatter.SseField) => {
-                const line = sseFormatter.instruction(field, 'message', testSerializer).toString();
+            availSseFields.forEach(field => {
+                const line = sseFmt.instruction(field as sseFmt.SseField, 'message', testSerializer).toString();
 
                 expect(line).to.equal(`${field}: ((message))\n`);
             });
         });
 
         it('uses JSON as the default serialization format', () => {
-            const lineAuto = sseFormatter.instruction('event', 'message').toString();
-            const lineJson = sseFormatter.instruction('event', 'message', JSON.stringify).toString();
+            const lineAuto = sseFmt.instruction('event', 'message').toString();
+            const lineJson = sseFmt.instruction('event', 'message', JSON.stringify).toString();
 
             expect(lineAuto).to.equal(lineJson);
         });
@@ -24,7 +24,7 @@ describe('sse_formatter', () => {
 
     describe('comment()', () => {
         it('formats a SSE comment', () => {
-            const comment = sseFormatter.comment('my comment').toString();
+            const comment = sseFmt.comment('my comment').toString();
 
             expect(comment).to.equal(': my comment\n');
         });
@@ -32,13 +32,13 @@ describe('sse_formatter', () => {
 
     describe('block()', () => {
         it('formats a SSE block', () => {
-            const block = sseFormatter.block({ id: 42, data: 'message' }, testSerializer).toString();
+            const block = sseFmt.block({ id: 42, data: 'message' }, testSerializer).toString();
 
             expect(block).to.equal('id: 42\ndata: ((message))\n\n');
         });
 
         it('applies the user serializer only the "data" field only', () => {
-            const block = sseFormatter.block({
+            const block = sseFmt.block({
                 id: 42,
                 event: 'xkcd/posts/new',
                 data: 'correct horse battery staple',
@@ -56,7 +56,7 @@ describe('sse_formatter', () => {
 
     describe('message()', () => {
         it('formats a standard SSE message (data-only)', () => {
-            const message = sseFormatter.message(
+            const message = sseFmt.message(
                 null,
                 'correct horse battery staple',
                 void 0,
@@ -69,7 +69,7 @@ describe('sse_formatter', () => {
         });
 
         it('formats a standard SSE message (event+data)', () => {
-            const message = sseFormatter.message(
+            const message = sseFmt.message(
                 'xkcd/posts/new',
                 'correct horse battery staple',
                 void 0,
@@ -83,7 +83,7 @@ describe('sse_formatter', () => {
         });
 
         it('formats a standard SSE message (id+event+data)', () => {
-            const message = sseFormatter.message(
+            const message = sseFmt.message(
                 'xkcd/posts/new',
                 'correct horse battery staple',
                 45..toString(),
@@ -98,7 +98,7 @@ describe('sse_formatter', () => {
         });
 
         it('throws when asked to format a data-less SSE message', () => {
-            const crash = () => sseFormatter.message('xkcd/posts/new', void 0, void 0).toString();
+            const crash = () => sseFmt.message('xkcd/posts/new', void 0, void 0).toString();
 
             expect(crash).to.throw(/.*data.*mandatory.*/);
         });

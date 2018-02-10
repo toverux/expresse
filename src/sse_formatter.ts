@@ -1,8 +1,8 @@
-export type SseField = 'event'|'data'|'id'|'retry'; // keyof fieldBufs
+export type SseField = 'event' | 'data' | 'id' | 'retry'; // keyof fieldBufs
 
-export type SseValue = Buffer|any;
+export type SseValue = Buffer | any;
 
-export type SseSerializer = (value: any) => string|Buffer;
+export type SseSerializer = (value: any) => string | Buffer;
 
 export interface ISseBlockConfiguration {
     [field: string /* in fact SseField */]: SseValue;
@@ -72,7 +72,7 @@ export function block(instructions: ISseBlockConfiguration, serializer?: SseSeri
  * @param serializer Value serializer for `data`
  */
 export function message(
-    event: string|null,
+    event: string | null,
     data: SseValue,
     id?: string,
     serializer?: SseSerializer

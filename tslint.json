@@ -6,6 +6,7 @@
     "object-literal-sort-keys": false,
     "arrow-parens": false,
     "no-unused-expression": false,
-    "comment-format": false
+    "comment-format": false,
+    "no-implicit-dependencies": [true, "dev"]
   }
 }
