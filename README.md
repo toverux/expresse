@@ -84,7 +84,7 @@ interface ISseMiddlewareOptions {
      *
      * @default false
      */
-    flushAfterWrite: boolean;
+    flushAfterWrite?: boolean;
 }
 ```
 
