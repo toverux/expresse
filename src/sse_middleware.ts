@@ -1,7 +1,7 @@
 import { compose } from 'compose-middleware';
 import { Handler, NextFunction, Request, Response } from 'express';
 import * as fmt from './sse_formatter';
-import { ISseMiddlewareOptions, sseHandler } from './sse_handler_middleware';
+import { ISseHandlerResponse, ISseMiddlewareOptions, sseHandler, sseWrite } from './sse_handler_middleware';
 
 export interface ISseFunctions {
     /**
@@ -57,16 +57,18 @@ export function sse(options: Partial<ISseMiddlewareOptions> = {}): Handler {
     const { serializer } = options;
 
     function middleware(req: Request, res: Response, next: NextFunction): void {
+        const write = (res as ISseHandlerResponse)[sseWrite];
+
         //=> Install the sse*() functions on Express' Response
         (res as ISseResponse).sse = {
             data(data: fmt.SseValue, id?: string) {
-                res.write(fmt.message(null, data, id, serializer));
+                write(fmt.message(null, data, id, serializer));
             },
             event(event: string, data: fmt.SseValue, id?: string) {
-                res.write(fmt.message(event, data, id, serializer));
+                write(fmt.message(event, data, id, serializer));
             },
             comment(comment: string) {
-                res.write(fmt.comment(comment));
+                write(fmt.comment(comment));
             }
         };
 

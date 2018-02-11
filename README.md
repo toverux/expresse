@@ -76,6 +76,15 @@ interface ISseMiddlewareOptions {
      * @default 5000
      */
     keepAliveInterval?: number;
+    
+    /**
+     * If you are using expressjs/compression, you MUST set this option to true.
+     * It will call res.flush() after each SSE messages so the partial content is compressed and reaches the client.
+     * Read {@link https://github.com/expressjs/compression#server-sent-events} for more.
+     *
+     * @default false
+     */
+    flushAfterWrite: boolean;
 }
 ```
 
@@ -231,34 +240,16 @@ app.get('/events', sse({ serializer: data => data.toString() }), yourMiddleware)
 
 ### Using Compression
 
-If you are using a HTTP compression middleware, like [expressjs/compression](https://github.com/expressjs/compression), _expresse_ won't likely work out of the box.
+If you are using a dynamic HTTP compression middleware, like [expressjs/compression](https://github.com/expressjs/compression), _expresse_ won't likely work out of the box.
 
 This is due to the nature of compression and how compression middlewares work. For example, express' compression middleware will patch res.write and hold the content written in it until `res.end()` or an equivalent is called. Then the body compression can happen and the compressed content can be sent.
 
-However `res.write()` must not be buffered with SSEs.
-You have two main options:
-
-<details>
-<summary>Disable compression on SSE endpoints (preferred)</summary>
-
-There are chances your SSE messages are short and won't benefit from compression. Moreover, compression is not efficient on short messages.
-
-You have various ways to disable compression (conditional middleware, per-route compression, etc), here's an example for expressjs/compression, that allows to filter the routes that will benefit from compression:
+Therefore, `res.write()` must not be buffered with SSEs. That's why ExpreSSE offers expressjs/compression support through the `flushAfterWrite` option. It **must** be set when using the compression middleware:
 
 ```typescript
-app.use(compression({
-    level: 7,
-    filter(req, res) {
-        return !req.originalUrl.includes('/your-sse-path');
-    }
-}));
+app.use(compression());
+
+app.get('/events', sse({ flushAfterWrite: true }), (req, res: ISseResponse) => {
+    res.sse.comment('Welcome! This is a compressed SSE stream.');
+});
 ```
-</details>
-
-<details>
-<summary>Call res.flush() to send compressed events (expressjs/compression -specific)</summary>
-
-If you want to keep compression, that's still possible, expressjs/compression provides a [`res.flush()`](https://expressjs.com/en/resources/middleware/compression.html#resflush) function that will compress and send the (partial) response content immediately (an event), instead of buffering everything that comes until the response end.
-
-After each `res.sse.*()` call, also call `res.flush()`. That's it. Oh and add a comment that links to this paragraph.
-</details>
