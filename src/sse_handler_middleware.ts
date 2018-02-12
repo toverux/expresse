@@ -11,6 +11,16 @@ export interface ISseMiddlewareOptions {
     serializer: fmt.SseSerializer;
 
     /**
+     * Whether to flush headers immediately or wait for the first res.write().
+     *  - Setting it to false can allow you or 3rd-party middlewares to set more headers on the response.
+     *  - Setting it to true is useful for debug and tesing the connection, ie. CORS restrictions fail only when headers
+     *    are flushed, which may not happen immediately when using SSE (it happens after the first res.write call).
+     *
+     * @default true
+     */
+    flushHeaders: boolean;
+
+    /**
      * Determines the interval, in milliseconds, between keep-alive packets (neutral SSE comments).
      * Pass false to disable heartbeats (ie. you only support modern browsers/native EventSource implementation and
      * therefore don't need heartbeats to avoid the browser closing an inactive socket).
@@ -36,7 +46,7 @@ export interface ISseHandlerResponse extends Response {
 }
 
 export function sseHandler(options: Partial<ISseMiddlewareOptions> = {}): Handler {
-    const { keepAliveInterval = 5000, flushAfterWrite = false } = options;
+    const { keepAliveInterval = 5000, flushHeaders = true, flushAfterWrite = false } = options;
 
     return (req, res, next) => {
         //=> Basic headers for an SSE session
@@ -46,10 +56,10 @@ export function sseHandler(options: Partial<ISseMiddlewareOptions> = {}): Handle
             'X-Accel-Buffering': 'no'
         });
 
-        //=> Write immediately on the socket.
+        //=> Flush headers immediately
         // This has the advantage to 'test' the connection: if the client can't access this resource because of
         // CORS restrictions, the connection will fail instantly.
-        write(': sse-start\n');
+        flushHeaders && res.flushHeaders();
 
         //=> Start heartbeats (if not disabled)
         if (keepAliveInterval !== false) {

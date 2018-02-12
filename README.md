@@ -68,7 +68,17 @@ interface ISseMiddlewareOptions {
      *
      * @default JSON.stringify
      */
-    serializer?: (value: any) => string|Buffer;
+    serializer?: (value: any) => string | Buffer;
+
+    /**
+     * Whether to flush headers immediately or wait for the first res.write().
+     *  - Setting it to false can allow you or 3rd-party middlewares to set more headers on the response.
+     *  - Setting it to true is useful for debug and tesing the connection, ie. CORS restrictions fail only when headers
+     *    are flushed, which may not happen immediately when using SSE (it happens after the first res.write call).
+     *
+     * @default true
+     */
+    flushHeaders: boolean;
 
     /**
      * Determines the interval, in milliseconds, between keep-alive packets (neutral SSE comments).
