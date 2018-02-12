@@ -12,10 +12,12 @@ export interface ISseMiddlewareOptions {
 
     /**
      * Determines the interval, in milliseconds, between keep-alive packets (neutral SSE comments).
+     * Pass false to disable heartbeats (ie. you only support modern browsers/native EventSource implementation and
+     * therefore don't need heartbeats to avoid the browser closing an inactive socket).
      *
      * @default 5000
      */
-    keepAliveInterval: number;
+    keepAliveInterval: false | number;
 
     /**
      * If you are using expressjs/compression, you MUST set this option to true.
@@ -49,12 +51,14 @@ export function sseHandler(options: Partial<ISseMiddlewareOptions> = {}): Handle
         // CORS restrictions, the connection will fail instantly.
         write(': sse-start\n');
 
-        //=> Regularly send keep-alive SSE comments, clear interval on socket close
-        const keepAliveTimer = setInterval(() => write(': sse-keep-alive\n'), keepAliveInterval);
+        //=> Start heartbeats (if not disabled)
+        if (keepAliveInterval !== false) {
+            if (typeof keepAliveInterval !== 'number') {
+                throw new Error('keepAliveInterval must be a number or === false');
+            }
 
-        //=> When the connection gets closed (close=client, finish=server), stop the keep-alive timer
-        res.once('close', () => clearInterval(keepAliveTimer));
-        res.once('finish', () => clearInterval(keepAliveTimer));
+            startKeepAlives(keepAliveInterval);
+        }
 
         //=> Attach the res.write wrapper function to the response for internal use
         (res as ISseHandlerResponse)[sseWrite] = write;
@@ -63,11 +67,23 @@ export function sseHandler(options: Partial<ISseMiddlewareOptions> = {}): Handle
         next();
 
         /**
-         * An internal function to write on the response socket with respect to compression settings.
+         * Writes on the response socket with respect to compression settings.
          */
         function write(chunk: any) {
             res.write(chunk);
             flushAfterWrite && (res as any).flush();
+        }
+
+        /**
+         * Writes heartbeats at a regular rate on the socket.
+         */
+        function startKeepAlives(interval: number) {
+            //=> Regularly send keep-alive SSE comments, clear interval on socket close
+            const keepAliveTimer = setInterval(() => write(': sse-keep-alive\n'), interval);
+
+            //=> When the connection gets closed (close=client, finish=server), stop the keep-alive timer
+            res.once('close', () => clearInterval(keepAliveTimer));
+            res.once('finish', () => clearInterval(keepAliveTimer));
         }
     };
 }

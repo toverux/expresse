@@ -72,10 +72,12 @@ interface ISseMiddlewareOptions {
 
     /**
      * Determines the interval, in milliseconds, between keep-alive packets (neutral SSE comments).
+     * Pass false to disable heartbeats (ie. you only support modern browsers/native EventSource implementation and
+     * therefore don't need heartbeats to avoid the browser closing an inactive socket).
      *
      * @default 5000
      */
-    keepAliveInterval?: number;
+    keepAliveInterval: false | number;
     
     /**
      * If you are using expressjs/compression, you MUST set this option to true.
