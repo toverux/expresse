@@ -78,7 +78,7 @@ interface ISseMiddlewareOptions {
      *
      * @default true
      */
-    flushHeaders: boolean;
+    flushHeaders?: boolean;
 
     /**
      * Determines the interval, in milliseconds, between keep-alive packets (neutral SSE comments).
@@ -87,7 +87,7 @@ interface ISseMiddlewareOptions {
      *
      * @default 5000
      */
-    keepAliveInterval: false | number;
+    keepAliveInterval?: false | number;
     
     /**
      * If you are using expressjs/compression, you MUST set this option to true.
